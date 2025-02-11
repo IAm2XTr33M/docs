@@ -1,5 +1,5 @@
 ---
-sidebarTitle: "Next"
+sidebarTitle: "Next2"
 title: Integrate Hanko with Next.js
 description: Learn how to quickly add authentication and user profile in your Next.js app using Hanko.
 ---
@@ -15,14 +15,21 @@ description: Learn how to quickly add authentication and user profile in your Ne
 ></iframe>
 </Frame>
 
+## Create a Next.js application
+Run the following command to [create a new Next.js application](https://nextjs.org/docs/app/getting-started/installation):
+<CodeGroup> 
+```bash terminal
+npx create-next-app@latest project-name
+```
+</CodeGroup>
+
+<Note>
+  During the Next.js setup you could pick between two routers, the [App Router](https://nextjs.org/docs/app) and the [Pages Router](https://nextjs.org/docs/pages).
+  Ensure you add the correct code and follow the correct directory structure for Router that you picked.
+</Note>
+
 ## Install `@teamhanko/hanko-elements`
-
-Once you've [initialized your Next app](https://nextjs.org/docs/app/getting-started/installation) , installing [hanko-elements](/guides/hanko-elements/introduction) provides you with access to the prebuilt components: `hanko-auth` and `hanko-profile`.
-
-During this quickstart, ensure that you add the code for the correct NextJS Router.\
-Either the [App Router](https://nextjs.org/docs/app) or the [Pages Router](https://nextjs.org/docs/pages), depending on your setup.
-
-
+Open your Next.js project folder in a terminal and run the following command to install the [hanko-elements](/guides/hanko-elements/introduction): 
 <CodeGroup> 
 ```bash npm
 npm install @teamhanko/hanko-elements
@@ -41,34 +48,41 @@ yarn add @teamhanko/hanko-elements
 ```
 </CodeGroup>
 
-## Add the Hanko API URL
 
-Retrieve the API URL from the [Hanko console](https://cloud.hanko.io/) and place it in your `.env` file.
+## Setup your Hanko project
+Go to the [Hanko console](https://cloud.hanko.io/) and create a project for this application.
 
-Make sure to update the URL of your project in the Hanko Console to the localhost port you will be developing on. (Most likely http://localhost:3000/)
+<Note>
+  During creation make sure to input the URL you will be developing on as the `APP URL`.\
+  (Most likely http://localhost:3000/) \
+ \
+  If you already have a project you can change the URL at:\
+  `'your project' > Settings > URLs > App URL`.
+</Note>
+
+## Add your Hanko API URL
+
+Retrieve your API URL from the [Hanko console](https://cloud.hanko.io/), and paste this in a `.env` file.
 
 ```sh .env.local
 NEXT_PUBLIC_HANKO_API_URL=https://f4****-4802-49ad-8e0b-3d3****ab32.hanko.io
 ```
 
 <Note>
-  If you are self-hosting you need to provide the URL of your running Hanko
-  backend.
+  If you are self-hosting you need to provide the URL of your running Hanko backend.
 </Note>
 
-## Create `<hanko-auth>` component
 
-The `<hanko-auth>` web component adds a login interface to your app. Begin by importing the register function from `@teamhanko/hanko-elements` into your Next.js component. Call it with the Hanko API URL as an argument to register `<hanko-auth>` with the browser's [CustomElementRegistry](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Once done, include it in your JSX.
+## Create `<hanko-auth>` and `<hanko-profile>` component
+Lets create a folder called `components` and create two files, `HankoAuth.tsx` and `HankoProfile.jsx`.
 
-For this QuickStart we will create a file at `components/HankoAuth.tsx` and insert the code below.
+Both of these components use the Hanko client from [@teamhanko/hanko-elements](/guides/hanko-elements/introduction), this allows you subscribe to specific [events](/guides/hanko-elements/using-frontend-sdk#events). For instance, the `onSessionCreated` event here triggers when a user successfully logs in. You can use these event to perform any desired action.
 
-The Hanko client from `@teamhanko/hanko-elements` allows you to subscribe to specific [events](/guides/hanko-elements/using-frontend-sdk#events). For instance, the `onSessionCreated` event here triggers when a user successfully logs in. You can use this event to perform any desired action.
+### Hanko Auth
+
+Now Lets Setup the `HankoAuth.tsx` file to create a functioning login page.
 
 [For more information please refer to the Auth Component Page.](/guides/hanko-elements/auth-component)
-
-<Note>
-  In certain IDE's there might be some 'errors' but in actuality its completely fine, we would advice to always try out what you have.
-</Note>
 
 <Tabs>
 <Tab title="App directory">
@@ -155,7 +169,7 @@ export default function HankoAuth() {
 </Tab>
 </Tabs>
 
-After you created the `HankoAuth` component, simply import it into any page.\
+After you created the `HankoAuth` component, import and add it in any page.\
 Just like this.
 
 <Tabs>
@@ -190,12 +204,10 @@ By now, your sign-up and sign-in features should be working. You should see an i
 <img src="/images/fullstack-guide/next-one.png" alt="sign up" width="500" style={{ borderRadius: '0.5rem' }}/>
 </Frame>
 
+### Hanko profile
 
-## Create `<hanko-profile>` component
-
-The `<hanko-profile>` component provides an interface where users can manage their `Password` , `Email Addresses`, `Passkeys`, `Security Keys` and `Sessions`.
-
-For this QuickStart we will create a file at `components/HankoProfile.tsx` and insert the code below.
+After setting up the HankoAuth lets Setup the `HankoProfile.jsx` file to create a interface where users can.
+manage their `Password` , `Email Addresses`, `Passkeys`, `Security Keys` and `Sessions`.
 
 [For more information please refer to the Profile Component Page.](/guides/hanko-elements/profile-component)
 
@@ -313,7 +325,7 @@ export default function LogoutBtn() {
   const logout = async () => {
     try {
       await hanko?.user.logout();
-      router.push("/login");
+      router.push("/");
       router.refresh();
       return;
     } catch (error) {
@@ -343,7 +355,7 @@ export default function LogoutBtn() {
   const logout = async () => {
     try {
       await hanko?.user.logout();
-      router.push("/login");
+      router.push("/");
       router.reload();
       return;
     } catch (error) {
@@ -367,7 +379,7 @@ You can customize the appearance of `hanko-auth` and `hanko-profile` components 
 To add JWT verification middleware with Hanko in your Next.js application, we're using our [session/validate API request](/api-reference/public/session-management/validate-a-session). By checking for a valid JWT this middleware will ensure secure access to specific routes, like `/dashboard` and `/protected` here.\
 In the middleware we define the Hanko API URL, extract and verify the JWT from cookies, and redirect unauthorized users back to the home or login page.
 
-For more info on middlware and where to put the `middleware.ts` file,\
+For more info on middleware and where to put the `middleware.ts` file,\
 please refer to [NEXTJS Middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware)
 
 <Note>
@@ -400,9 +412,9 @@ export async function middleware(req: NextRequest) {
       throw new Error('Session validation failed');
     }
     
-    const verifiedJWT = await response.json();
+    const verifiedResponse = await response.json();
 
-    if(!verifiedJWT.is_valid){
+    if(!verifiedResponse.is_valid){
       throw new Error('JWT is not valid');
     }
 
@@ -413,7 +425,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard",'/protected'],
+  matcher: ["/dashboard"],
 };
 ```
 
@@ -533,33 +545,37 @@ export function useSessionData(): HankoSession {
 </Tab>
 </Tabs>
 
-Lets create a page called `protected` where we will display some of the info from the custom hooks. Import the hooks you created and use them to display the users email and id.\
-This page will only be loaded if you are logged in and your session is valid (because of the middleware) and the content will only load if its done loading and is valid.
+Lets update the `dashboard` page to show some of the information from the custom hooks.
 
 <Tabs>
 <Tab title="App directory">
-```jsx app/protected/page.tsx
+```jsx app/dashboard/page.tsx
 "use client" //Only for NextJS App Router
-import { useUserData } from "@/hooks/useUserData";
-import { useSessionData } from "@/hooks/useSessionData";
 
-export default function Protected() {
+import HankoProfile from "../components/HankoProfile";
+import LogoutButton from "../components/LogoutButton";
+
+import { useUserData } from "../hooks/useUserData";
+import { useSessionData } from "../hooks/useSessionData";
+
+export default function Dashboard() {
   const { id, email, loading: userDataLoading, error: userDataError } = useUserData();
   const { userID, jwt, isValid, loading: sessionDataLoading, error: sessionDataError } = useSessionData();
 
   if(userDataLoading || sessionDataLoading){
     return(
       <div>
+        <HankoProfile></HankoProfile>
+        <LogoutButton></LogoutButton>
         Loading.....
       </div>
     )
   }
-  else if(isValid){
+  else if (isValid){
     return (
       <div>
-        <h1>This is a protected page.</h1>
-        <h1>You can see this because you are signed in.</h1><br />
-
+        <HankoProfile></HankoProfile>
+        <LogoutButton></LogoutButton>
         <h2>Some user data:</h2>
         <h2>Email: {email}</h2>
         <h2>ID: {id}</h2>
@@ -571,27 +587,31 @@ export default function Protected() {
 </Tab>
 
 <Tab title="Pages directory">
-```jsx pages/protected.tsx
-import { useUserData } from "@/hooks/useUserData";
-import { useSessionData } from "@/hooks/useSessionData";
+```jsx pages/dashboard.tsx
+import HankoProfile from "../components/HankoProfile";
+import LogoutButton from "../components/LogoutButton";
 
-export default function Protected() {
+import { useUserData } from "../hooks/useUserData";
+import { useSessionData } from "../hooks/useSessionData";
+
+export default function Dashboard() {
   const { id, email, loading: userDataLoading, error: userDataError } = useUserData();
   const { userID, jwt, isValid, loading: sessionDataLoading, error: sessionDataError } = useSessionData();
 
   if(userDataLoading || sessionDataLoading){
     return(
       <div>
+        <HankoProfile></HankoProfile>
+        <LogoutButton></LogoutButton>
         Loading.....
       </div>
     )
   }
-  else if(isValid){
+  else if (isValid){
     return (
       <div>
-        <h1>This is a protected page.</h1>
-        <h1>You can see this because you are signed in.</h1><br />
-
+        <HankoProfile></HankoProfile>
+        <LogoutButton></LogoutButton>
         <h2>Some user data:</h2>
         <h2>Email: {email}</h2>
         <h2>ID: {id}</h2>
